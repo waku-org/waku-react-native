@@ -1,0 +1,8 @@
+framework module "Gowaku" {
+	header "ref.h"
+    header "Gowaku.objc.h"
+    header "Universe.objc.h"
+    header "Gowaku.h"
+
+    export *
+}
