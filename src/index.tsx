@@ -1,4 +1,5 @@
 import { NativeModules, Platform, NativeEventEmitter } from 'react-native';
+import {decode, encode} from 'base-64'
 
 const LINKING_ERROR =
   `The package '@waku/react-native' doesn't seem to be linked. Make sure: \n\n` +
@@ -26,8 +27,7 @@ export class WakuMessage {
   timestamp: Number | null = null;
 
   toJSON(){
-    var decoder = new TextDecoder('utf8');
-    var b64encoded = btoa(decoder.decode(this.payload));
+    const b64encoded = encode(String.fromCharCode(...this.payload));
     return {
       contentTopic: this.contentTopic,
       version: this.version,
@@ -37,26 +37,32 @@ export class WakuMessage {
   }
 }
 
-export function onMessage(cb) {
-  // TODO:
-  let eventListener = eventEmitter.addListener("message", event => {
+export function onMessage(cb: (arg0:any) => void) {
+  eventEmitter.addListener("message", event => {
     let signal = JSON.parse(event.signal);
     let msg = signal.event.wakuMessage;
-    console.log(msg);
     signal.event.wakuMessage = new WakuMessage();
     signal.event.wakuMessage.timestamp = msg.timestamp;
     signal.event.wakuMessage.version = msg.version || 0;
     signal.event.wakuMessage.contentTopic = msg.contentTopic;
-    signal.event.wakuMessage.payload = new Uint8Array(atob(msg.payload).split("").map(c => c.charCodeAt(0)));
+    signal.event.wakuMessage.payload = new Uint8Array(decode(msg.payload).split("").map((c:any) => c.charCodeAt(0)));
     cb(signal);
   })
 }
 
-export function newNode(): Promise<void> {
+export class Config {
+  host: String | null = null
+  port: Number | null = null
+  advertiseAddr: String | null = null
+  nodeKey: String | null = null
+  keepAliveInterval: Number | null = null
+  relay: Boolean | null = null
+  minPeersToPublish: Number | null = null
+}
+
+export function newNode(config: Config | null): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
-    // TODO:
-    let config = null
-    let response = JSON.parse(await ReactNative.newNode(config));
+    let response = JSON.parse(await ReactNative.newNode(config ? JSON.stringify(config) : ""));
     if(response.error){
       reject(response.error);
     } else {
@@ -98,7 +104,7 @@ export function peerID(): Promise<string> {
   });
 }
 
-export function relayPublish(msg: WakuMessage, topic: String | null = null, ms: Number = 0): Promise<string> {
+export function relayPublish(msg: WakuMessage, topic: String = "", ms: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
     let response = JSON.parse(await ReactNative.relayPublish(messageJSON, topic, ms));
@@ -110,7 +116,31 @@ export function relayPublish(msg: WakuMessage, topic: String | null = null, ms: 
   });
 }
 
-export function relaySubscribe(topic: String | null = null): Promise<void> {
+export function relayPublishEncodeAsymmetric(msg: WakuMessage, publicKey: String, topic: String = "", ms: Number = 0): Promise<string> {
+  return new Promise<string>(async (resolve, reject) => {
+    let messageJSON = JSON.stringify(msg)
+    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, topic, publicKey, ms));
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result);
+    }
+  });
+}
+
+export function relayPublishEncodeSymmetric(msg: WakuMessage, symmetricKey: String, topic: String = "", ms: Number = 0): Promise<string> {
+  return new Promise<string>(async (resolve, reject) => {
+    let messageJSON = JSON.stringify(msg)
+    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, topic, symmetricKey, ms));
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result);
+    }
+  });
+}
+
+export function relaySubscribe(topic: String = ""): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.relaySubscribe(topic));
     if(response.error){
@@ -125,20 +155,185 @@ export function defaultPubsubTopic(): Promise<string> {
   return ReactNative.defaultPubsubTopic();
 }
 
-// TODO: listenAddresses
-// TODO: addPeer
-// TODO: connect
-// TODO: connectPeerID
-// TODO: disconnect
-// TODO: peerCnt
+export function listenAddresses(): Promise<Array<string>> {
+  return new Promise<Array<string>>(async (resolve, reject) => {
+    let response = JSON.parse(await ReactNative.listenAddresses());
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result);
+    }
+  });
+}
+
+export function addPeer(multiAddress: String, protocol: String): Promise<string> {
+  return new Promise<string>(async (resolve, reject) => {
+    let response = JSON.parse(await ReactNative.addPeer(multiAddress, protocol));
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result);
+    }
+  });
+}
+
+export function connect(multiAddress: String): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    let response = JSON.parse(await ReactNative.connect(multiAddress));
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve();
+    }
+  });
+}
+
+export function connectPeerID(peerID: String): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    let response = JSON.parse(await ReactNative.connectPeerID(peerID));
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve();
+    }
+  });
+}
+
+export function disconnect(peerID: String): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    let response = JSON.parse(await ReactNative.disconnect(peerID));
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve();
+    }
+  });
+}
+
+export function peerCnt(): Promise<Number> {
+  return new Promise<Number>(async (resolve, reject) => {
+    let response = JSON.parse(await ReactNative.peerCnt());
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result);
+    }
+  });
+}
+
+export class DecodedPayload {
+  payload: Uint8Array = new Uint8Array();
+  padding: Uint8Array = new Uint8Array();
+  pubkey: String | null = "";
+  signature: String | null = "";
+
+  toJSON(){
+    const b64payload = encode(String.fromCharCode(...this.payload));
+    const b64padding = encode(String.fromCharCode(...this.padding));
+    return {
+      payload: b64payload,
+      padding: b64padding,
+      pubkey: this.pubkey,
+      signature: this.signature,
+    }
+  }
+}
+
+export function decodeSymmetric(msg: WakuMessage, symmetricKey: String): Promise<DecodedPayload> {
+  return new Promise<DecodedPayload>(async (resolve, reject) => {
+    let messageJSON = JSON.stringify(msg);
+    let response = JSON.parse(await ReactNative.decodeSymmetric(messageJSON, symmetricKey));
+    if(response.error){
+      reject(response.error);
+    } else {
+      let decodedPayload = new DecodedPayload();
+      decodedPayload.payload = new Uint8Array(atob(response.result.payload).split("").map(c => c.charCodeAt(0)));
+      decodedPayload.padding = new Uint8Array(atob(response.result.padding).split("").map(c => c.charCodeAt(0)));
+      decodedPayload.pubkey = response.result.pubkey;
+      decodedPayload.signature = response.result.signature;
+      resolve(decodedPayload);
+    }
+  });
+}
+
+export function decodeAsymmetric(msg: WakuMessage, privateKey: String): Promise<DecodedPayload> {
+  return new Promise<DecodedPayload>(async (resolve, reject) => {
+    let messageJSON = JSON.stringify(msg);
+    let response = JSON.parse(await ReactNative.decodeSymmetric(messageJSON, privateKey));
+    if(response.error){
+      reject(response.error);
+    } else {
+      let decodedPayload = new DecodedPayload();
+      decodedPayload.payload = new Uint8Array(atob(response.result.payload).split("").map(c => c.charCodeAt(0)));
+      decodedPayload.padding = new Uint8Array(atob(response.result.padding).split("").map(c => c.charCodeAt(0)));
+      decodedPayload.pubkey = response.result.pubkey;
+      decodedPayload.signature = response.result.signature;
+      resolve(decodedPayload);
+    }
+  });
+}
+
+export function relayEnoughPeers(topic: String = ""): Promise<Boolean> {
+  return new Promise<Boolean>(async (resolve, reject) => {
+    let response = JSON.parse(await ReactNative.relayEnoughPeers(topic));
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result);
+    }
+  });
+}
+
+export function relayUnsubscribe(topic: String = ""): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    let response = JSON.parse(await ReactNative.relayUnsubscribe(topic));
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result);
+    }
+  });
+}
+
+export function lightpushPublish(msg: WakuMessage, topic: String = "", peerID: String = "", ms: Number = 0): Promise<string> {
+  return new Promise<string>(async (resolve, reject) => {
+    let messageJSON = JSON.stringify(msg)
+    let response = JSON.parse(await ReactNative.relayPublish(messageJSON, topic, peerID, ms));
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result);
+    }
+  });
+}
+
+export function lightpushPublishEncAsymmetric(msg: WakuMessage, publicKey: String, topic: String = "", peerID: String = "", ms: Number = 0): Promise<string> {
+  return new Promise<string>(async (resolve, reject) => {
+    let messageJSON = JSON.stringify(msg)
+    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, topic, peerID, publicKey, ms));
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result);
+    }
+  });
+}
+
+export function lightpushPublishEncSymmetric(msg: WakuMessage, symmetricKey: String, topic: String = "", peerID: String = "", ms: Number = 0): Promise<string> {
+  return new Promise<string>(async (resolve, reject) => {
+    let messageJSON = JSON.stringify(msg)
+    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, topic,  peerID, symmetricKey, ms));
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result);
+    }
+  });
+}
+
+
+
+
+
 // TODO: peers
-// TODO: decodeSymmetric
-// TODO: decodeAsymmetric
-// TODO: lightpushPublish
-// TODO: lightpushPublishEncAsymmetric
-// TODO: lightpushPublishEncSymmetric
-// TODO: relayEnoughPeers
-// TODO: relayPublishEncAsymmetric
-// TODO: relayPublishEncSymmetric
-// TODO: relayUnsubscribe
 // TODO: relayStoreQuery

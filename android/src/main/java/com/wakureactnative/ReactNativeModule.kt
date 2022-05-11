@@ -48,7 +48,7 @@ class ReactNativeModule(reactContext: ReactApplicationContext) : ReactContextBas
     }
 
     @ReactMethod
-    fun newNode(configJSON: String?, promise: Promise) {
+    fun newNode(configJSON: String = "", promise: Promise) {
       signalHandler = DefaultEventHandler(reactContext)
       Gowaku.setMobileSignalHandler(signalHandler)
       promise.resolve(Gowaku.newNode(configJSON))
@@ -105,28 +105,67 @@ class ReactNativeModule(reactContext: ReactApplicationContext) : ReactContextBas
     }
 
     @ReactMethod
-    fun relaySubscribe(topic: String?, promise: Promise) {
+    fun relaySubscribe(topic: String, promise: Promise) {
         promise.resolve(Gowaku.relaySubscribe(topic))
     }
 
     @ReactMethod
-    fun relayPublish(messageJSON: String, topic: String?, ms: Double, promise: Promise) {
+    fun relayPublish(messageJSON: String, topic: String, ms: Double, promise: Promise) {
         promise.resolve(Gowaku.relayPublish(messageJSON, topic, ms.toLong()))
     } 
 
-/*
-TODO: Create functions for these
-extern char* waku_peers();
-extern char* waku_decode_symmetric(char* messageJSON, char* symmetricKey);
-extern char* waku_decode_asymmetric(char* messageJSON, char* privateKey);
-extern char* waku_lightpush_publish(char* messageJSON, char* topic, char* peerID, int ms);
-extern char* waku_lightpush_publish_enc_asymmetric(char* messageJSON, char* topic, char* peerID, char* publicKey, char* optionalSigningKey, int ms);
-extern char* waku_lightpush_publish_enc_symmetric(char* messageJSON, char* topic, char* peerID, char* symmetricKey, char* optionalSigningKey, int ms);
-extern char* waku_relay_enough_peers(char* topic);
-extern char* waku_relay_publish_enc_asymmetric(char* messageJSON, char* topic, char* publicKey, char* optionalSigningKey, int ms);
-extern char* waku_relay_publish_enc_symmetric(char* messageJSON, char* topic, char* symmetricKey, char* optionalSigningKey, int ms);
-extern char* waku_relay_unsubscribe(char* topic);
-extern char* waku_store_query(char* queryJSON, char* peerID, int ms);
-*/
+    @ReactMethod
+    fun relayEnoughPeers(topic: String, promise: Promise) {
+        promise.resolve(Gowaku.relayEnoughPeers(topic))
+    }
 
+    @ReactMethod
+    fun relayUnsubscribe(topic: String, promise: Promise) {
+        promise.resolve(Gowaku.relayUnsubscribe(topic))
+    }
+
+    @ReactMethod
+    fun relayPublishEncodeAsymmetric(messageJSON: String, topic: String, publicKey: String, optionalSigningKey: String = "", ms: Double, promise: Promise) {
+        promise.resolve(Gowaku.relayPublishEncodeAsymmetric(messageJSON, topic, publicKey, optionalSigningKey, ms.toLong()))
+    }
+
+    @ReactMethod
+    fun relayPublishEncodeSymmetric(messageJSON: String, topic: String, symmetricKey: String, optionalSigningKey: String = "", ms: Double, promise: Promise) {
+        promise.resolve(Gowaku.relayPublishEncodeSymmetric(messageJSON, topic, symmetricKey, optionalSigningKey, ms.toLong()))
+    }
+
+    @ReactMethod
+    fun peers(promise: Promise) {
+        promise.resolve(Gowaku.peers())
+    }
+
+    @ReactMethod
+    fun lightpushPublish(messageJSON: String, topic: String, peerID: String = "", ms: Double, promise: Promise) {
+        promise.resolve(Gowaku.lightpushPublish(messageJSON, topic, peerID, ms.toLong()))
+    }
+
+    @ReactMethod
+    fun lightpushPublishEncodeAsymmetric(messageJSON: String, topic: String, peerID: String = "", publicKey: String = "", optionalSigningKey: String = "", ms: Double, promise: Promise) {
+        promise.resolve(Gowaku.lightpushPublishEncodeAsymmetric(messageJSON, topic, peerID, publicKey, optionalSigningKey, ms.toLong()))
+    }
+
+    @ReactMethod
+    fun lightpushPublishEncodeSymmetric(messageJSON: String, topic: String, peerID: String = "", symmetricKey: String = "", optionalSigningKey: String = "", ms: Double, promise: Promise) {
+        promise.resolve(Gowaku.lightpushPublishEncodeSymmetric(messageJSON, topic, peerID, symmetricKey, optionalSigningKey, ms.toLong()))
+    }
+
+    @ReactMethod
+    fun decodeSymmetric(messageJSON: String, symmetricKey: String, promise: Promise) {
+        promise.resolve(Gowaku.decodeSymmetric(messageJSON, symmetricKey))
+    }
+
+    @ReactMethod
+    fun decodeAsymmetric(messageJSON: String, privateKey: String, promise: Promise) {
+        promise.resolve(Gowaku.decodeAsymmetric(messageJSON, privateKey))
+    }
+
+    @ReactMethod
+    fun storeQuery(queryJSON: String, peerID: String = "", ms: Double, promise: Promise) {
+        promise.resolve(Gowaku.storeQuery(queryJSON, peerID, ms.toLong()))
+    }
 }
