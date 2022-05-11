@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { defaultPubsubTopic, newNode, onMessage, peerID, relayPublish, relaySubscribe, start, stop, WakuMessage } from '@waku/react-native';
+import { defaultPubsubTopic, listenAddresses, newNode, onMessage, peerID, relayEnoughPeers, relayPublish, relaySubscribe, relayUnsubscribe, start, stop, WakuMessage, connect, peerCnt, peers } from '@waku/react-native';
 
 
 
@@ -20,9 +20,20 @@ export default function App() {
       await relaySubscribe()
 
       onMessage(event => {
-        console.log("EVENT RECEIVED: ", event)
+        console.log("Message Received: ", event)
 
       })
+
+      console.log("enoughPeers?", await relayEnoughPeers())
+      console.log("addresses", await listenAddresses())
+      console.log("connecting...")
+      
+      await connect("/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/30303/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm", 5000)
+      
+      console.log("connected!")
+
+      console.log("PeerCNT", await peerCnt())
+      console.log("Peers", await peers())
 
       let msg: WakuMessage = new WakuMessage()
       msg.contentTopic = "ABC"
@@ -34,6 +45,7 @@ export default function App() {
 
       console.log("The messageID", messageID)
 
+      await relayUnsubscribe();
 
       await stop(); // TODO: This must be called only once
     })();

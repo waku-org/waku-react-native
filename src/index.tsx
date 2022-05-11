@@ -151,11 +151,11 @@ export function relaySubscribe(topic: String = ""): Promise<void> {
   });
 }
 
-export function defaultPubsubTopic(): Promise<string> {
+export function defaultPubsubTopic(): Promise<String> {
   return ReactNative.defaultPubsubTopic();
 }
 
-export function listenAddresses(): Promise<Array<string>> {
+export function listenAddresses(): Promise<Array<String>> {
   return new Promise<Array<string>>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.listenAddresses());
     if(response.error){
@@ -166,7 +166,7 @@ export function listenAddresses(): Promise<Array<string>> {
   });
 }
 
-export function addPeer(multiAddress: String, protocol: String): Promise<string> {
+export function addPeer(multiAddress: String, protocol: String): Promise<String> {
   return new Promise<string>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.addPeer(multiAddress, protocol));
     if(response.error){
@@ -177,9 +177,9 @@ export function addPeer(multiAddress: String, protocol: String): Promise<string>
   });
 }
 
-export function connect(multiAddress: String): Promise<void> {
+export function connect(multiAddress: String, ms: Number = 0): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
-    let response = JSON.parse(await ReactNative.connect(multiAddress));
+    let response = JSON.parse(await ReactNative.connect(multiAddress, ms));
     if(response.error){
       reject(response.error);
     } else {
@@ -188,9 +188,9 @@ export function connect(multiAddress: String): Promise<void> {
   });
 }
 
-export function connectPeerID(peerID: String): Promise<void> {
+export function connectPeerID(peerID: String, ms: Number = 0): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
-    let response = JSON.parse(await ReactNative.connectPeerID(peerID));
+    let response = JSON.parse(await ReactNative.connectPeerID(peerID, ms));
     if(response.error){
       reject(response.error);
     } else {
@@ -331,9 +331,29 @@ export function lightpushPublishEncSymmetric(msg: WakuMessage, symmetricKey: Str
   });
 }
 
+export class Peer {
+  addrs: Array<String> = Array()
+  connected: Boolean = false
+  peerID: String = ""
+  protocols: Array<String> = Array()
 
+  constructor(addrs: Array<String>, connected: Boolean, peerID: String, protocols: Array<String>){
+    this.addrs = addrs;
+    this.connected = connected;
+    this.peerID = peerID;
+    this.protocols = protocols;
+  }
+}
 
+export function peers(): Promise<Array<Peer>> {
+  return new Promise<Array<Peer>>(async (resolve, reject) => {
+    let response = JSON.parse(await ReactNative.peers());
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result.map((x:any) => new Peer(x.addrs, x.connected, x.peerID, x.protocols)));
+    }
+  })
+}
 
-
-// TODO: peers
-// TODO: relayStoreQuery
+// TODO: storeQuery
