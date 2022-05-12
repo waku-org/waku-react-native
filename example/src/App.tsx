@@ -1,10 +1,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { defaultPubsubTopic, listenAddresses, newNode, onMessage, peerID, relayEnoughPeers, relayPublish, relaySubscribe, relayUnsubscribe, start, stop, WakuMessage, connect, peerCnt, peers } from '@waku/react-native';
-
-
-
+import { defaultPubsubTopic, newNode, start, stop, peerID, relayEnoughPeers, listenAddresses, connect, peerCnt, peers, relayPublish, relayUnsubscribe, relaySubscribe, WakuMessage/*, onMessage*/ } from '@waku/react-native';
 
 export default function App() {
   const [result, setResult] = React.useState<string | undefined>();
@@ -12,17 +9,19 @@ export default function App() {
 
   React.useEffect(() => {
     (async () => {
-      await newNode();  // TODO: This must be called only once
+      await newNode(null);  // TODO: This must be called only once
       await start(); // // TODO: This must be called only once
 
       console.log("The node ID:", await peerID())
 
       await relaySubscribe()
 
+      /*
+      // TODO: this is only implemented in android for now
       onMessage(event => {
         console.log("Message Received: ", event)
-
       })
+      */
 
       console.log("enoughPeers?", await relayEnoughPeers())
       console.log("addresses", await listenAddresses())
@@ -46,7 +45,7 @@ export default function App() {
       console.log("The messageID", messageID)
 
       await relayUnsubscribe();
-
+    
       await stop(); // TODO: This must be called only once
     })();
 

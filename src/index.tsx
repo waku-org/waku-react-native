@@ -1,4 +1,4 @@
-import { NativeModules, Platform, NativeEventEmitter } from 'react-native';
+import { NativeModules, Platform /*, NativeEventEmitter */} from 'react-native';
 import {decode, encode} from 'base-64'
 
 const LINKING_ERROR =
@@ -18,24 +18,27 @@ const ReactNative = NativeModules.ReactNative
       }
     );
 
+export class WakuMessage {
+      payload: Uint8Array = new Uint8Array();
+      contentTopic: String | null = "";
+      version: Number | null = 0;
+      timestamp: Number | null = null;
+    
+      toJSON(){
+        const b64encoded = encode(String.fromCharCode(...this.payload));
+        return {
+          contentTopic: this.contentTopic,
+          version: this.version,
+          timestamp: this.timestamp,
+          payload: b64encoded
+        }
+      }
+    }
+
+/*
+// TODO: this has been only implemented in android for now
 
 var eventEmitter = new NativeEventEmitter(NativeModules.ToastExample);
-export class WakuMessage {
-  payload: Uint8Array = new Uint8Array();
-  contentTopic: String | null = "";
-  version: Number | null = 0;
-  timestamp: Number | null = null;
-
-  toJSON(){
-    const b64encoded = encode(String.fromCharCode(...this.payload));
-    return {
-      contentTopic: this.contentTopic,
-      version: this.version,
-      timestamp: this.timestamp,
-      payload: b64encoded
-    }
-  }
-}
 
 export function onMessage(cb: (arg0:any) => void) {
   eventEmitter.addListener("message", event => {
@@ -49,6 +52,7 @@ export function onMessage(cb: (arg0:any) => void) {
     cb(signal);
   })
 }
+*/
 
 export class Config {
   host: String | null = null
@@ -116,10 +120,10 @@ export function relayPublish(msg: WakuMessage, topic: String = "", ms: Number = 
   });
 }
 
-export function relayPublishEncodeAsymmetric(msg: WakuMessage, publicKey: String, topic: String = "", ms: Number = 0): Promise<string> {
+export function relayPublishEncodeAsymmetric(msg: WakuMessage, publicKey: String, optionalSigningKey: String = "", topic: String = "", ms: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
-    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, topic, publicKey, ms));
+    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, topic, publicKey, optionalSigningKey, ms));
     if(response.error){
       reject(response.error);
     } else {
@@ -128,10 +132,10 @@ export function relayPublishEncodeAsymmetric(msg: WakuMessage, publicKey: String
   });
 }
 
-export function relayPublishEncodeSymmetric(msg: WakuMessage, symmetricKey: String, topic: String = "", ms: Number = 0): Promise<string> {
+export function relayPublishEncodeSymmetric(msg: WakuMessage, symmetricKey: String, optionalSigningKey: String = "", topic: String = "", ms: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
-    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, topic, symmetricKey, ms));
+    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, topic, symmetricKey, optionalSigningKey, ms));
     if(response.error){
       reject(response.error);
     } else {
@@ -295,10 +299,15 @@ export function relayUnsubscribe(topic: String = ""): Promise<void> {
   });
 }
 
+
+
+
+
+
 export function lightpushPublish(msg: WakuMessage, topic: String = "", peerID: String = "", ms: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
-    let response = JSON.parse(await ReactNative.relayPublish(messageJSON, topic, peerID, ms));
+    let response = JSON.parse(await ReactNative.lightpushPublish(messageJSON, topic, peerID, ms));
     if(response.error){
       reject(response.error);
     } else {
@@ -307,10 +316,10 @@ export function lightpushPublish(msg: WakuMessage, topic: String = "", peerID: S
   });
 }
 
-export function lightpushPublishEncAsymmetric(msg: WakuMessage, publicKey: String, topic: String = "", peerID: String = "", ms: Number = 0): Promise<string> {
+export function lightpushPublishEncAsymmetric(msg: WakuMessage, publicKey: String, optionalSigningKey: String = "", topic: String = "", peerID: String = "", ms: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
-    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, topic, peerID, publicKey, ms));
+    let response = JSON.parse(await ReactNative.lightpushPublishEncodeAsymmetric(messageJSON, topic, peerID, publicKey, optionalSigningKey, ms));
     if(response.error){
       reject(response.error);
     } else {
@@ -319,10 +328,10 @@ export function lightpushPublishEncAsymmetric(msg: WakuMessage, publicKey: Strin
   });
 }
 
-export function lightpushPublishEncSymmetric(msg: WakuMessage, symmetricKey: String, topic: String = "", peerID: String = "", ms: Number = 0): Promise<string> {
+export function lightpushPublishEncSymmetric(msg: WakuMessage, symmetricKey: String, optionalSigningKey: String = "", topic: String = "", peerID: String = "", ms: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
-    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, topic,  peerID, symmetricKey, ms));
+    let response = JSON.parse(await ReactNative.lightpushPublishEncodeAsymmetric(messageJSON, topic,  peerID, symmetricKey, optionalSigningKey, ms));
     if(response.error){
       reject(response.error);
     } else {
