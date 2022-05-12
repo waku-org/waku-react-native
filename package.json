@@ -2,6 +2,14 @@
   "name": "@waku/react-native",
   "version": "0.1.0",
   "description": "Waku React Native",
+  "author": "Status Research & Development GMBH",
+  "authors": [
+    {
+      "name": "Richard Ramos",
+      "email": "info@richardramos.me",
+      "homepage": "https://github.com/richard-ramos"
+    }
+  ],
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
   "types": "lib/typescript/index.d.ts",
@@ -52,6 +60,7 @@
     "@types/jest": "^27.0.3",
     "@types/react": "^17.0.37",
     "@types/react-native": "0.66.8",
+    "@types/base-64": "^1.0.0",
     "commitlint": "^11.0.0",
     "eslint": "^8.4.1",
     "eslint-config-prettier": "^7.0.0",

@@ -480,7 +480,7 @@ SPEC CHECKSUMS:
   React-RCTVibration: ae4f914cfe8de7d4de95ae1ea6cc8f6315d73d9d
   ReactCommon: 73d79c7039f473b76db6ff7c6b159c478acbbb3b
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
-  waku-react-native: 1070e046ff4e009da4e1498bc21e4e1210ac0549
+  waku-react-native: c477aeceeb99374027b7cc594ea2d83594f8fea8
   Yoga: 4bd86afe9883422a7c4028c00e34790f560923d6
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
