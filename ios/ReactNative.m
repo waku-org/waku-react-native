@@ -1,6 +1,9 @@
+#import <React/RCTEventEmitter.h>
 #import <React/RCTBridgeModule.h>
 
-@interface RCT_EXTERN_MODULE(ReactNative, NSObject)
+@interface RCT_EXTERN_MODULE(ReactNative, RCTEventEmitter)
+
+RCT_EXTERN_METHOD(supportedEvents)
 
 RCT_EXTERN_METHOD(defaultPubsubTopic:
                 (RCTPromiseResolveBlock)resolve

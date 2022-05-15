@@ -1,4 +1,4 @@
-import { NativeModules, Platform /*, NativeEventEmitter */} from 'react-native';
+import { NativeModules, Platform, NativeEventEmitter} from 'react-native';
 import {decode, encode} from 'base-64'
 
 const LINKING_ERROR =
@@ -35,10 +35,7 @@ export class WakuMessage {
       }
     }
 
-/*
-// TODO: this has been only implemented in android for now
-
-var eventEmitter = new NativeEventEmitter(NativeModules.ToastExample);
+var eventEmitter = new NativeEventEmitter(NativeModules.ReactNative);
 
 export function onMessage(cb: (arg0:any) => void) {
   eventEmitter.addListener("message", event => {
@@ -49,10 +46,9 @@ export function onMessage(cb: (arg0:any) => void) {
     signal.event.wakuMessage.version = msg.version || 0;
     signal.event.wakuMessage.contentTopic = msg.contentTopic;
     signal.event.wakuMessage.payload = new Uint8Array(decode(msg.payload).split("").map((c:any) => c.charCodeAt(0)));
-    cb(signal);
+    cb(signal.event);
   })
 }
-*/
 
 export class Config {
   host: String | null = null
@@ -65,7 +61,7 @@ export class Config {
 }
 
 export function newNode(config: Config | null): Promise<void> {
-  return new Promise<void>(async (resolve, reject) => {
+  return new Promise<void>(async (resolve, reject) => {    
     let response = JSON.parse(await ReactNative.newNode(config ? JSON.stringify(config) : ""));
     if(response.error){
       reject(response.error);

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { defaultPubsubTopic, newNode, start, stop, peerID, relayEnoughPeers, listenAddresses, connect, peerCnt, peers, relayPublish, relayUnsubscribe, relaySubscribe, WakuMessage/*, onMessage*/ } from '@waku/react-native';
+import { defaultPubsubTopic, newNode, start, stop, peerID, relayEnoughPeers, listenAddresses, connect, peerCnt, peers, relayPublish, relayUnsubscribe, relaySubscribe, WakuMessage, onMessage } from '@waku/react-native';
 
 export default function App() {
   const [result, setResult] = React.useState<string | undefined>();
@@ -16,12 +16,9 @@ export default function App() {
 
       await relaySubscribe()
 
-      /*
-      // TODO: this is only implemented in android for now
       onMessage(event => {
         console.log("Message Received: ", event)
       })
-      */
 
       console.log("enoughPeers?", await relayEnoughPeers())
       console.log("addresses", await listenAddresses())

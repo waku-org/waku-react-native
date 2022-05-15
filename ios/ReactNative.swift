@@ -1,8 +1,45 @@
 import Gowaku
+import React
 
 @objc(ReactNative)
-class ReactNative: NSObject {
+class ReactNative: RCTEventEmitter {
 
+    var hasListener: Bool = false
+
+      override func startObserving() {
+        hasListener = true
+      }
+
+      override func stopObserving() {
+        hasListener = false
+      }
+
+    func sendEvent(signalJson: String) {
+        if hasListener {
+          self.sendEvent(withName:"message", body:["signal": signalJson]);
+        }
+     }
+
+     @objc
+     override func supportedEvents() -> [String]! {
+       return ["message"];
+     }
+
+    var signalHandler: GowakuSignalHandlerProtocol?
+
+    class DefaultEventHandler : NSObject, GowakuSignalHandlerProtocol {
+        var parent: ReactNative
+        init(p: ReactNative) {
+            parent = p
+            super.init()
+        }
+        
+        public func handleSignal(_ p0: String?) {
+            parent.sendEvent(signalJson: p0!)
+        }
+    }
+
+    
     @objc(defaultPubsubTopic:withRejecter:)
     func defaultPubsubTopic(_ resolve:RCTPromiseResolveBlock, withRejecter reject:RCTPromiseRejectBlock) -> Void {
         resolve(GowakuDefaultPubsubTopic())
@@ -10,6 +47,8 @@ class ReactNative: NSObject {
 
     @objc(newNode:withResolver:withRejecter:)
     func newNode(config: String, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
+        signalHandler = DefaultEventHandler(p:self)
+        GowakuSetMobileSignalHandler(signalHandler)
         resolve(GowakuNewNode(config))
     }
 
