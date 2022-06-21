@@ -33,11 +33,16 @@
     "test": "jest",
     "typescript": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "check-gowaku": "./download-gowaku.sh",
+    "download-gowaku": "./download-gowaku.sh --force",
     "prepare": "bob build",
+    "prerelease": "yarn check-gowaku",
     "release": "release-it",
     "example": "yarn --cwd example",
+    "prepods": "yarn check-gowaku",
     "pods": "cd example && pod-install --quiet",
-    "bootstrap": "yarn example && yarn && yarn pods"
+    "bootstrap": "yarn check-gowaku && yarn example && yarn && yarn pods",
+    "prepublish": "yarn check-gowaku"
   },
   "keywords": [
     "react-native",
