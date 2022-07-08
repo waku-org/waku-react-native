@@ -1,6 +1,6 @@
 {
   "name": "@waku/react-native",
-  "version": "0.0.1-test1",
+  "version": "0.0.2",
   "description": "Waku React Native",
   "author": "Status Research & Development GMBH",
   "authors": [
@@ -56,6 +56,7 @@
   },
   "homepage": "https://github.com/status-im/waku-react-native#readme",
   "publishConfig": {
+    "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {

@@ -6,6 +6,7 @@ import { defaultPubsubTopic, newNode, start, stop, peerID, relayEnoughPeers, lis
 export default function App() {
   const [result, setResult] = React.useState<string | undefined>();
 
+  const delay = ms => new Promise(res => setTimeout(res, ms));
 
   React.useEffect(() => {
     (async () => {
@@ -41,9 +42,13 @@ export default function App() {
 
       console.log("The messageID", messageID)
 
-      await relayUnsubscribe();
+      // await delay(5000) // Waiting 5s before unsubscribing
+
+      // console.log("Unsubscribing and stopping node...")
+
+      // await relayUnsubscribe();
     
-      await stop(); // TODO: This must be called only once
+      // await stop(); // TODO: This must be called only once
     })();
 
     defaultPubsubTopic().then(setResult);

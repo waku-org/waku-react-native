@@ -26,6 +26,7 @@ if ! test -d "./ios/Gowaku.xcframework"; then
     DOWNLOAD_IOS=true
 fi
 
+mkdir -p tmp
 cd tmp
 
 rm -f ${SHA_FILE}

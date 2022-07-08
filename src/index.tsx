@@ -45,7 +45,7 @@ export function onMessage(cb: (arg0:any) => void) {
     signal.event.wakuMessage.timestamp = msg.timestamp;
     signal.event.wakuMessage.version = msg.version || 0;
     signal.event.wakuMessage.contentTopic = msg.contentTopic;
-    signal.event.wakuMessage.payload = new Uint8Array(decode(msg.payload).split("").map((c:any) => c.charCodeAt(0)));
+    signal.event.wakuMessage.payload = new Uint8Array(decode(msg.payload ?? []).split("").map((c:any) => c.charCodeAt(0)));
     cb(signal.event);
   })
 }
