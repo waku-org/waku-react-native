@@ -93,6 +93,17 @@ export function stop(): Promise<void> {
   });
 }
 
+export function isStarted(): Promise<Boolean> {
+  return new Promise<Boolean>(async (resolve, reject) => {
+    let response = JSON.parse(await ReactNative.isStarted());
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result);
+    }
+  });
+}
+
 export function peerID(): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.peerID());
@@ -295,11 +306,6 @@ export function relayUnsubscribe(topic: String = ""): Promise<void> {
   });
 }
 
-
-
-
-
-
 export function lightpushPublish(msg: WakuMessage, topic: String = "", peerID: String = "", ms: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
@@ -361,4 +367,37 @@ export function peers(): Promise<Array<Peer>> {
   })
 }
 
-// TODO: storeQuery
+export class Index {
+  digest: Uint8Array = new Uint8Array();
+  receiverTime: Number = 0
+  senderTime: Number = 0
+  pubsubTopic: String = ""
+}
+export class PagingOptions {
+  pageSize: Number = 0
+  cursor: Index | null = null
+  forward: Boolean = false
+}
+export class StoreQuery {
+  pubsubTopic: String = ""
+  contentFilters: Array<String> = Array()
+  startTime: Number = 0
+  endTime: Number = 0
+  pagingOptions: PagingOptions | null = null
+}
+
+export function storeQuery(query: StoreQuery, peerID: String = "", ms: Number = 0): Promise<string> {
+  return new Promise<string>(async (resolve, reject) => {
+    let queryJSON = JSON.stringify(query)
+    let response = JSON.parse(await ReactNative.storeQuery(queryJSON, peerID, ms));
+
+    console.log("STORE RESPONSE:")
+    console.log(response)
+
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve(response.result);
+    }
+  });
+}

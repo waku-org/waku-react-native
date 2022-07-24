@@ -21,6 +21,10 @@ RCT_EXTERN_METHOD(stop:
                 (RCTPromiseResolveBlock)resolve
                 withRejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(isStarted:
+                (RCTPromiseResolveBlock)resolve
+                withRejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(peerID:
                 (RCTPromiseResolveBlock)resolve
                 withRejecter:(RCTPromiseRejectBlock)reject)
@@ -122,6 +126,12 @@ RCT_EXTERN_METHOD(decodeSymmetric:(NSString *)msg
 
 RCT_EXTERN_METHOD(decodeAsymmetric:(NSString *)msg
                  withPrivateKey:(NSString *)privateKey
+                 withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(storeQuery:(NSString *)query
+                 withPeerID:(NSString *)peerID
+                 withMs:(nonnull NSNumber *)ms
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
