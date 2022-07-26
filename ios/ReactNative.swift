@@ -63,7 +63,7 @@ class ReactNative: RCTEventEmitter {
     }
 
     @objc(isStarted:withRejecter:)
-    func stop(_ resolve:RCTPromiseResolveBlock, withRejecter reject:RCTPromiseRejectBlock) -> Void {
+    func isStarted(_ resolve:RCTPromiseResolveBlock, withRejecter reject:RCTPromiseRejectBlock) -> Void {
         resolve(GowakuIsStarted())
     }
 
