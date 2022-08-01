@@ -62,6 +62,11 @@ class ReactNative: RCTEventEmitter {
         resolve(GowakuStop())
     }
 
+    @objc(isStarted:withRejecter:)
+    func isStarted(_ resolve:RCTPromiseResolveBlock, withRejecter reject:RCTPromiseRejectBlock) -> Void {
+        resolve(GowakuIsStarted())
+    }
+
     @objc(peerID:withRejecter:)
     func peerID(_ resolve:RCTPromiseResolveBlock, withRejecter reject:RCTPromiseRejectBlock) -> Void {
         resolve(GowakuPeerID())
@@ -155,6 +160,11 @@ class ReactNative: RCTEventEmitter {
     @objc(decodeAsymmetric:withPrivateKey:withResolver:withRejecter:)
     func decodeAsymmetric(msg: String, privateKey: String, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
         resolve(GowakuDecodeAsymmetric(msg, privateKey))
+    }
+
+    @objc(storeQuery:withPeerID:withMs:withResolver:withRejecter:)
+    func storeQuery(queryJSON: String, peerID: String, ms: Int, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
+        resolve(GowakuStoreQuery(queryJSON, peerID, ms))
     }
 
 }

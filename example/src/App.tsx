@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { defaultPubsubTopic, newNode, start, stop, peerID, relayEnoughPeers, listenAddresses, connect, peerCnt, peers, relayPublish, relayUnsubscribe, relaySubscribe, WakuMessage, onMessage } from '@waku/react-native';
+import { defaultPubsubTopic, newNode, start, isStarted, stop, peerID, relayEnoughPeers, listenAddresses, connect, peerCnt, peers, relayPublish, relayUnsubscribe, relaySubscribe, WakuMessage, onMessage, storeQuery, StoreQuery } from '@waku/react-native';
 
 export default function App() {
   const [result, setResult] = React.useState<string | undefined>();
@@ -10,9 +10,12 @@ export default function App() {
 
   React.useEffect(() => {
     (async () => {
-      await newNode(null);  // TODO: This must be called only once
-      await start(); // // TODO: This must be called only once
+      const nodeStarted = await isStarted();
 
+      if (!nodeStarted) {
+        await newNode(null);
+        await start();
+      }
       console.log("The node ID:", await peerID())
 
       await relaySubscribe()
@@ -27,7 +30,7 @@ export default function App() {
       
       await connect("/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/30303/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm", 5000)
       
-      console.log("connected!")
+      console.log("connected!") 
 
       console.log("PeerCNT", await peerCnt())
       console.log("Peers", await peers())
@@ -42,6 +45,14 @@ export default function App() {
 
       console.log("The messageID", messageID)
 
+      /*
+      console.log("Retrieving messages from store node")
+      const query = new StoreQuery();
+      //query.contentFilters.push("/toy-chat/2/luzhou/proto")
+      const queryResult = await storeQuery(query, "16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm")
+      console.log(queryResult)
+      */
+     
       // await delay(5000) // Waiting 5s before unsubscribing
 
       // console.log("Unsubscribing and stopping node...")

@@ -65,6 +65,11 @@ class ReactNativeModule(reactContext: ReactApplicationContext) : ReactContextBas
     }
 
     @ReactMethod
+    fun isStarted(promise: Promise) {
+        promise.resolve(Gowaku.isStarted())
+    }
+
+    @ReactMethod
     fun peerID(promise: Promise) {
         promise.resolve(Gowaku.peerID())
     }
