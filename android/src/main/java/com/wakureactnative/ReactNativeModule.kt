@@ -173,4 +173,14 @@ class ReactNativeModule(reactContext: ReactApplicationContext) : ReactContextBas
     fun storeQuery(queryJSON: String, peerID: String = "", ms: Double, promise: Promise) {
         promise.resolve(Gowaku.storeQuery(queryJSON, peerID, ms.toLong()))
     }
+
+    @ReactMethod
+    fun filterSubscribe(filterJSON: String, peerID: String = "", ms: Double, promise: Promise) {
+        promise.resolve(Gowaku.filterSubscribe(filterJSON, peerID, ms.toLong()))
+    }
+
+    @ReactMethod
+    fun filterUnsubscribe(filterJSON: String, ms: Double, promise: Promise) {
+        promise.resolve(Gowaku.filterUnsubscribe(filterJSON, ms.toLong()))
+    }
 }
