@@ -378,9 +378,14 @@ export class PagingOptions {
   cursor: Index | null = null
   forward: Boolean = false
 }
+
+export class ContentFilter {
+  contentTopic: String = ""
+}
+
 export class StoreQuery {
   pubsubTopic: String = ""
-  contentFilters: Array<String> = Array()
+  contentFilters: Array<ContentFilter> = Array()
   startTime: Number = 0
   endTime: Number = 0
   pagingOptions: PagingOptions | null = null
@@ -391,13 +396,41 @@ export function storeQuery(query: StoreQuery, peerID: String = "", ms: Number = 
     let queryJSON = JSON.stringify(query)
     let response = JSON.parse(await ReactNative.storeQuery(queryJSON, peerID, ms));
 
-    console.log("STORE RESPONSE:")
-    console.log(response)
-
     if(response.error){
       reject(response.error);
     } else {
       resolve(response.result);
+    }
+  });
+}
+
+export class FilterSubscription {
+  topic: String | null = null
+  contentFilters: Array<ContentFilter> = Array()
+}
+
+export function filterSubscribe(filter: FilterSubscription, peerID: String = "", ms: Number = 0): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    let filterJSON = JSON.stringify(filter)
+    let response = JSON.parse(await ReactNative.filterSubscribe(filterJSON, peerID, ms));
+
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve();
+    }
+  });
+}
+
+export function filterUnsubscribe(filter: FilterSubscription, ms: Number = 0): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    let filterJSON = JSON.stringify(filter)
+    let response = JSON.parse(await ReactNative.filterSubscribe(filterJSON, ms));
+
+    if(response.error){
+      reject(response.error);
+    } else {
+      resolve();
     }
   });
 }

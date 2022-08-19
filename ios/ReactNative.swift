@@ -167,4 +167,14 @@ class ReactNative: RCTEventEmitter {
         resolve(GowakuStoreQuery(queryJSON, peerID, ms))
     }
 
+    @objc(filterSubscribe:withPeerID:withMs:withResolver:withRejecter:)
+    func filterSubscribe(filterJSON: String, peerID: String, ms: Int, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
+        resolve(GowakuFilterSubscribe(filterJSON, peerID, ms))
+    }
+
+    @objc(filterUnsubscribe:withMs:withResolver:withRejecter:)
+    func filterSubscribe(filterJSON: String, ms: Int, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
+        resolve(GowakuFilterUnsubscribe(filterJSON, ms))
+    }
+
 }

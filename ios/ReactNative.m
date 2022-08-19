@@ -135,4 +135,16 @@ RCT_EXTERN_METHOD(storeQuery:(NSString *)query
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(filterSubscribe:(NSString *)filterJSON
+                 withPeerID:(NSString *)peerID
+                 withMs:(nonnull NSNumber *)ms
+                 withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(filterUnsubscribe:(NSString *)filterJSON
+                 withMs:(nonnull NSNumber *)ms
+                 withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
+
+
 @end
