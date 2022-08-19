@@ -64,3 +64,6 @@ android/keystores/debug.keystore
 lib/
 
 tmp/
+android/libs/gowaku-sources.jar
+android/libs/gowaku.aar
+ios/Gowaku.xcframework

@@ -405,7 +405,7 @@ export function storeQuery(query: StoreQuery, peerID: String = "", ms: Number = 
 }
 
 export class FilterSubscription {
-  topic: String | null = null
+  pubsubTopic: String | null = null
   contentFilters: Array<ContentFilter> = Array()
 }
 

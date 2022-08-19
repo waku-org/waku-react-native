@@ -35,8 +35,8 @@ wget "https://github.com/status-im/go-waku/releases/download/v${VERSION}/${SHA_F
 if [ "$DOWNLOAD_ANDROID" = true ]; then
     rm -f ${ANDROID_TAR}
     wget "https://github.com/status-im/go-waku/releases/download/v${VERSION}/${ANDROID_TAR}"
-
-    if ! sha256sum --status --ignore-missing -c gowaku-0.1.0.sha256; then
+    sha256sum --status --ignore-missing -c ${SHA_FILE}
+    if ! sha256sum --status --ignore-missing -c ${SHA_FILE}; then
         echo "checksum failed - verify download"
         exit 1
     fi
@@ -49,7 +49,7 @@ if [ "$DOWNLOAD_IOS" = true ]; then
     rm -f ${IOS_TAR}
     wget "https://github.com/status-im/go-waku/releases/download/v${VERSION}/${IOS_TAR}"
 
-    if ! sha256sum --status --ignore-missing -c gowaku-0.1.0.sha256; then
+    if ! sha256sum --status --ignore-missing -c ${SHA_FILE}; then
         echo "checksum failed - verify download"
         exit 1
     fi
