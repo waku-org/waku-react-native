@@ -1,5 +1,4 @@
 package com.wakureactnative
-
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -10,6 +9,11 @@ import com.facebook.react.modules.core.DeviceEventManagerModule
 import gowaku.Gowaku
 
 class ReactNativeModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+
+    override fun getName(): String {
+        return "ReactNative"
+    }
+
     var reactContext = reactContext
     lateinit var signalHandler: gowaku.SignalHandler
 
@@ -32,7 +36,6 @@ class ReactNativeModule(reactContext: ReactApplicationContext) : ReactContextBas
         }
     }
 
-
     @ReactMethod
     fun addListener(eventName: String) {
         // Set up any upstream listeners or background tasks as necessary
@@ -41,10 +44,6 @@ class ReactNativeModule(reactContext: ReactApplicationContext) : ReactContextBas
     @ReactMethod
     fun removeListeners(count: Int) {
         // Remove upstream listeners, stop unnecessary background tasks
-    }
-
-    override fun getName(): String {
-        return "ReactNative"
     }
 
     @ReactMethod
@@ -183,4 +182,5 @@ class ReactNativeModule(reactContext: ReactApplicationContext) : ReactContextBas
     fun filterUnsubscribe(filterJSON: String, ms: Double, promise: Promise) {
         promise.resolve(Gowaku.filterUnsubscribe(filterJSON, ms.toLong()))
     }
+
 }

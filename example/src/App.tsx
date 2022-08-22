@@ -27,7 +27,8 @@ export default function App() {
       console.log("connecting...")
       
       await connect("/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/30303/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm", 5000)
-      
+      await connect("/dns4/node-01.do-ams3.wakuv2.test.statusim.net/tcp/30303/p2p/16Uiu2HAmPLe7Mzm8TsYUubgCAW1aJoeFScxrLj8ppHFivPo97bUZ", 5000)
+
       console.log("connected!") 
 
       console.log("PeerCNT", await peerCnt())
@@ -50,9 +51,6 @@ export default function App() {
       query.contentFilters.push(new ContentFilter("/toy-chat/2/luzhou/proto"))
       const queryResult = await storeQuery(query, "16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm")
       console.log(queryResult)
-      
-
-
       
       // USING FILTER INSTEAD OF RELAY:
       // Instantiate the node passing these parameters:
