@@ -33,16 +33,10 @@
     "test": "jest",
     "typescript": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "check-gowaku": "./download-gowaku.sh",
-    "download-gowaku": "./download-gowaku.sh --force",
     "prepare": "bob build",
-    "prerelease": "yarn check-gowaku",
     "release": "release-it",
     "example": "yarn --cwd example",
-    "prepods": "yarn check-gowaku",
-    "pods": "cd example && pod-install --quiet",
-    "bootstrap": "yarn check-gowaku && yarn example && yarn && yarn pods",
-    "prepublish": "yarn check-gowaku"
+    "bootstrap": "yarn example && yarn && yarn example pods"
   },
   "keywords": [
     "react-native",
@@ -60,27 +54,31 @@
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
-    "@commitlint/config-conventional": "^11.0.0",
-    "@react-native-community/eslint-config": "^2.0.0",
-    "@release-it/conventional-changelog": "^2.0.0",
-    "@types/jest": "^27.0.3",
-    "@types/react": "^17.0.37",
-    "@types/react-native": "0.66.8",
-    "@types/base-64": "^1.0.0",
-    "commitlint": "^11.0.0",
-    "eslint": "^8.4.1",
-    "eslint-config-prettier": "^7.0.0",
-    "eslint-plugin-prettier": "^3.1.3",
-    "husky": "^6.0.0",
-    "jest": "^27.4.3",
-    "pod-install": "^0.1.0",
-    "prettier": "^2.0.5",
-    "react": "17.0.2",
-    "react-native": "0.66.3",
-    "react-native-builder-bob": "^0.18.2",
-    "release-it": "^14.2.2",
-    "typescript": "^4.5.2"
-  },
+      "@arkweid/lefthook": "^0.7.7",
+      "@babel/eslint-parser": "^7.18.2",
+      "@commitlint/config-conventional": "^17.0.2",
+      "@react-native-community/eslint-config": "^3.0.2",
+      "@release-it/conventional-changelog": "^5.0.0",
+      "@types/base-64": "^1.0.0",
+      "@types/jest": "^28.1.2",
+      "@types/react": "~17.0.21",
+      "@types/react-native": "0.68.0",
+      "commitlint": "^17.0.2",
+      "eslint": "^8.4.1",
+      "eslint-config-prettier": "^8.5.0",
+      "eslint-plugin-prettier": "^4.0.0",
+      "jest": "^28.1.1",
+      "pod-install": "^0.1.0",
+      "prettier": "^2.0.5",
+      "react": "17.0.2",
+      "react-native": "0.68.2",
+      "react-native-builder-bob": "^0.18.3",
+      "release-it": "^15.0.0",
+      "typescript": "^4.5.2"
+    },
+    "resolutions": {
+      "@types/react": "17.0.21"
+    },
   "peerDependencies": {
     "react": "*",
     "react-native": "*"
@@ -116,6 +114,7 @@
   },
   "eslintConfig": {
     "root": true,
+    "parser": "@babel/eslint-parser",
     "extends": [
       "@react-native-community",
       "prettier"
