@@ -7,9 +7,7 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo managed workflow\n';
 
-const ReactNative = NativeModules.ReactNative
-  ? NativeModules.ReactNative
-  : new Proxy(
+const ReactNative = NativeModules.ReactNative  ? NativeModules.ReactNative  : new Proxy(
       {},
       {
         get() {
@@ -17,6 +15,11 @@ const ReactNative = NativeModules.ReactNative
         },
       }
     );
+
+export function multiply(a: number, b: number): Promise<number> {
+  return ReactNative.multiply(a, b);
+}
+
 
 export class WakuMessage {
       payload: Uint8Array = new Uint8Array();
@@ -37,6 +40,10 @@ export class WakuMessage {
 
 var eventEmitter = new NativeEventEmitter(NativeModules.ReactNative);
 
+/**
+ * Execute function each time a message is received
+ * @param cb callback to be eecuted
+ */
 export function onMessage(cb: (arg0:any) => void) {
   eventEmitter.addListener("message", event => {
     let signal = JSON.parse(event.signal);
@@ -57,9 +64,14 @@ export class Config {
   nodeKey: String | null = null
   keepAliveInterval: Number | null = null
   relay: Boolean | null = null
+  filter: Boolean | null = null
   minPeersToPublish: Number | null = null
 }
 
+/**
+ * Instantiates a Waku node.
+ * @param config options used to initialize a go-waku node
+ */
 export function newNode(config: Config | null): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {    
     let response = JSON.parse(await ReactNative.newNode(config ? JSON.stringify(config) : ""));
@@ -71,6 +83,9 @@ export function newNode(config: Config | null): Promise<void> {
   });
 }
 
+/**
+ * Start a Waku node mounting all the protocols that were enabled during the Waku node instantiation.
+ */
 export function start(): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.start());
@@ -82,6 +97,9 @@ export function start(): Promise<void> {
   });
 }
 
+/**
+ * Stops a Waku node.
+ */
 export function stop(): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.stop());
@@ -93,6 +111,10 @@ export function stop(): Promise<void> {
   });
 }
 
+/**
+ * Is the node started?
+ * @returns `true` if the node is started, `false` otherwise
+ */
 export function isStarted(): Promise<Boolean> {
   return new Promise<Boolean>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.isStarted());
@@ -104,6 +126,10 @@ export function isStarted(): Promise<Boolean> {
   });
 }
 
+/**
+ * Get the peer ID of the waku node.
+ * @returns Base58 encoded peer ID
+ */
 export function peerID(): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.peerID());
@@ -115,10 +141,17 @@ export function peerID(): Promise<string> {
   });
 }
 
-export function relayPublish(msg: WakuMessage, topic: String = "", ms: Number = 0): Promise<string> {
+/**
+ * Publish a message using Waku Relay.
+ * @param msg WakuMessage to publish. The message version is overwritten to `0`
+ * @param pubsubTopic pubsub topic on which to publish the message. If not specified, it will use the default pubsub topic
+ * @param timeoutMs Timeout value in milliseconds to execute the call. If the function takes longer than this value, the execution will be canceled and an error returned
+ * @returns string containing the message id
+ */
+export function relayPublish(msg: WakuMessage, pubsubTopic: String = "", timeoutMs: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
-    let response = JSON.parse(await ReactNative.relayPublish(messageJSON, topic, ms));
+    let response = JSON.parse(await ReactNative.relayPublish(messageJSON, pubsubTopic, timeoutMs));
     if(response.error){
       reject(response.error);
     } else {
@@ -127,10 +160,19 @@ export function relayPublish(msg: WakuMessage, topic: String = "", ms: Number = 
   });
 }
 
-export function relayPublishEncodeAsymmetric(msg: WakuMessage, publicKey: String, optionalSigningKey: String = "", topic: String = "", ms: Number = 0): Promise<string> {
+/**
+ * Optionally sign, encrypt using asymmetric encryption and publish a message using Waku Relay. 
+ * @param msg WakuMessage to publish. The message version is overwritten to `1`
+ * @param publicKey hex encoded public key to be used for encryption.
+ * @param optionalSigningKey hex encoded private key to be used to sign the message.
+ * @param pubsubTopic pubsub topic on which to publish the message. If not specified, it will use the default pubsub topic.
+ * @param timeoutMs Timeout value in milliseconds to execute the call. If the function takes longer than this value, the execution will be canceled and an error returned
+ * @returns string containing the message id
+ */
+export function relayPublishEncodeAsymmetric(msg: WakuMessage, publicKey: String, optionalSigningKey: String = "", pubsubTopic: String = "", timeoutMs: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
-    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, topic, publicKey, optionalSigningKey, ms));
+    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, pubsubTopic, publicKey, optionalSigningKey, timeoutMs));
     if(response.error){
       reject(response.error);
     } else {
@@ -139,10 +181,19 @@ export function relayPublishEncodeAsymmetric(msg: WakuMessage, publicKey: String
   });
 }
 
-export function relayPublishEncodeSymmetric(msg: WakuMessage, symmetricKey: String, optionalSigningKey: String = "", topic: String = "", ms: Number = 0): Promise<string> {
+/**
+ * Optionally sign, encrypt using symmetric encryption and publish a message using Waku Relay.
+ * @param msg WakuMessage to publish. The message version is overwritten to `1`
+ * @param symmetricKey  32 byte hex encoded secret key to be used for encryption
+ * @param optionalSigningKey hex encoded private key to be used to sign the message
+ * @param pubsubTopic pubsub topic on which to publish the message. If not specified, it will use the default pubsub topic
+ * @param timeoutMs Timeout value in milliseconds to execute the call. If the function takes longer than this value, the execution will be canceled and an error returned
+ * @returns string containing the message id
+ */
+export function relayPublishEncodeSymmetric(msg: WakuMessage, symmetricKey: String, optionalSigningKey: String = "", pubsubTopic: String = "", timeoutMs: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
-    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, topic, symmetricKey, optionalSigningKey, ms));
+    let response = JSON.parse(await ReactNative.relayPublishEncodeAsymmetric(messageJSON, pubsubTopic, symmetricKey, optionalSigningKey, timeoutMs));
     if(response.error){
       reject(response.error);
     } else {
@@ -151,6 +202,10 @@ export function relayPublishEncodeSymmetric(msg: WakuMessage, symmetricKey: Stri
   });
 }
 
+/**
+ * Subscribe to a Waku Relay pubsub topic to receive messages.
+ * @param topic Pubsub topic to subscribe to. 
+ */
 export function relaySubscribe(topic: String = ""): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.relaySubscribe(topic));
@@ -162,10 +217,18 @@ export function relaySubscribe(topic: String = ""): Promise<void> {
   });
 }
 
+/**
+ * Returns the default pubsub topic used for exchanging waku messages defined in [RFC 10](https://rfc.vac.dev/spec/10/).
+ * @returns the default pubsub topic `/waku/2/default-waku/proto`
+ */
 export function defaultPubsubTopic(): Promise<String> {
   return ReactNative.defaultPubsubTopic();
 }
 
+/**
+ * Get the multiaddresses the Waku node is listening to.
+ * @returns an array of multiaddresses
+ */
 export function listenAddresses(): Promise<Array<String>> {
   return new Promise<Array<string>>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.listenAddresses());
@@ -177,6 +240,12 @@ export function listenAddresses(): Promise<Array<String>> {
   });
 }
 
+/**
+ * Add a node multiaddress and protocol to the waku node's peerstore.
+ * @param multiAddress multiaddress (with peer id) to reach the peer being added
+ * @param protocol protocol we expect the peer to support
+ * @returns  peer ID as a base58 `string` of the peer that was added
+ */
 export function addPeer(multiAddress: String, protocol: String): Promise<String> {
   return new Promise<string>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.addPeer(multiAddress, protocol));
@@ -188,9 +257,14 @@ export function addPeer(multiAddress: String, protocol: String): Promise<String>
   });
 }
 
-export function connect(multiAddress: String, ms: Number = 0): Promise<void> {
+/**
+ * Dial peer using a multiaddress.
+ * @param multiAddress multiaddress to reach the peer being dialed
+ * @param timeoutMs Timeout value in milliseconds to execute the call. If the function takes longer than this value, the execution will be canceled and an error returned
+ */
+export function connect(multiAddress: String, timeoutMs: Number = 0): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
-    let response = JSON.parse(await ReactNative.connect(multiAddress, ms));
+    let response = JSON.parse(await ReactNative.connect(multiAddress, timeoutMs));
     if(response.error){
       reject(response.error);
     } else {
@@ -199,9 +273,14 @@ export function connect(multiAddress: String, ms: Number = 0): Promise<void> {
   });
 }
 
-export function connectPeerID(peerID: String, ms: Number = 0): Promise<void> {
+/**
+ * Dial peer using its peer ID.
+ * @param peerID  Peer ID to dial. The peer must be already known.  It must have been added before with `addPeer` or previously dialed with `connect`
+ * @param timeoutMs Timeout value in milliseconds to execute the call. If the function takes longer than this value, the execution will be canceled and an error returned
+ */
+export function connectPeerID(peerID: String, timeoutMs: Number = 0): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
-    let response = JSON.parse(await ReactNative.connectPeerID(peerID, ms));
+    let response = JSON.parse(await ReactNative.connectPeerID(peerID, timeoutMs));
     if(response.error){
       reject(response.error);
     } else {
@@ -210,6 +289,10 @@ export function connectPeerID(peerID: String, ms: Number = 0): Promise<void> {
   });
 }
 
+/**
+ * Disconnect a peer using its peerID
+ * @param peerID Peer ID to disconnect.
+ */
 export function disconnect(peerID: String): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.disconnect(peerID));
@@ -221,6 +304,10 @@ export function disconnect(peerID: String): Promise<void> {
   });
 }
 
+/**
+ * Get number of connected peers.
+ * @returns number of connected peers
+ */
 export function peerCnt(): Promise<Number> {
   return new Promise<Number>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.peerCnt());
@@ -250,6 +337,12 @@ export class DecodedPayload {
   }
 }
 
+/**
+ * Decrypt a message using a symmetric key
+ * @param msg WakuMessage to decode. The message version is expected to be 1
+ * @param symmetricKey 32 byte symmetric key hex encoded
+ * @returns DecodedPayload
+ */
 export function decodeSymmetric(msg: WakuMessage, symmetricKey: String): Promise<DecodedPayload> {
   return new Promise<DecodedPayload>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg);
@@ -267,6 +360,12 @@ export function decodeSymmetric(msg: WakuMessage, symmetricKey: String): Promise
   });
 }
 
+/**
+ * Decrypt a message using a secp256k1 private key 
+ * @param msg WakuMessage to decode. The message version is expected to be 1
+ * @param privateKey secp256k1 private key hex encoded
+ * @returns DecodedPayload
+ */
 export function decodeAsymmetric(msg: WakuMessage, privateKey: String): Promise<DecodedPayload> {
   return new Promise<DecodedPayload>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg);
@@ -284,9 +383,14 @@ export function decodeAsymmetric(msg: WakuMessage, privateKey: String): Promise<
   });
 }
 
-export function relayEnoughPeers(topic: String = ""): Promise<Boolean> {
+/**
+ * Determine if there are enough peers to publish a message on a given pubsub topic.
+ * @param pubsubTopic Pubsub topic to verify. If not specified, it will verify the default pubsub topic
+ * @returns boolean indicates whether there are enough peers
+ */
+export function relayEnoughPeers(pubsubTopic: String = ""): Promise<Boolean> {
   return new Promise<Boolean>(async (resolve, reject) => {
-    let response = JSON.parse(await ReactNative.relayEnoughPeers(topic));
+    let response = JSON.parse(await ReactNative.relayEnoughPeers(pubsubTopic));
     if(response.error){
       reject(response.error);
     } else {
@@ -295,9 +399,13 @@ export function relayEnoughPeers(topic: String = ""): Promise<Boolean> {
   });
 }
 
-export function relayUnsubscribe(topic: String = ""): Promise<void> {
+/**
+ * Closes the pubsub subscription to a pubsub topic. No more messages will be received from this pubsub topic.
+ * @param pubsubTopic 
+ */
+export function relayUnsubscribe(pubsubTopic: String = ""): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
-    let response = JSON.parse(await ReactNative.relayUnsubscribe(topic));
+    let response = JSON.parse(await ReactNative.relayUnsubscribe(pubsubTopic));
     if(response.error){
       reject(response.error);
     } else {
@@ -306,10 +414,18 @@ export function relayUnsubscribe(topic: String = ""): Promise<void> {
   });
 }
 
-export function lightpushPublish(msg: WakuMessage, topic: String = "", peerID: String = "", ms: Number = 0): Promise<string> {
+/**
+ * Publish a message using Waku Lightpush.
+ * @param msg WakuMessage to publish. The message version is overwritten to `0`
+ * @param pubsubTopic pubsub topic on which to publish the message. If not specified, it uses the default pubsub topic. 
+ * @param peerID Peer ID supporting the lightpush protocol.  The peer must be already known.  It must have been added before with `addPeer` or previously dialed with `connect`
+ * @param timeoutMs Timeout value in milliseconds to execute the call. If the function takes longer than this value, the execution will be canceled and an error returned
+ * @returns the message ID
+ */
+export function lightpushPublish(msg: WakuMessage, pubsubTopic: String = "", peerID: String = "", timeoutMs: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
-    let response = JSON.parse(await ReactNative.lightpushPublish(messageJSON, topic, peerID, ms));
+    let response = JSON.parse(await ReactNative.lightpushPublish(messageJSON, pubsubTopic, peerID, timeoutMs));
     if(response.error){
       reject(response.error);
     } else {
@@ -318,10 +434,20 @@ export function lightpushPublish(msg: WakuMessage, topic: String = "", peerID: S
   });
 }
 
-export function lightpushPublishEncAsymmetric(msg: WakuMessage, publicKey: String, optionalSigningKey: String = "", topic: String = "", peerID: String = "", ms: Number = 0): Promise<string> {
+/**
+ * Optionally sign, encrypt using asymmetric encryption and publish a message using Waku Lightpush.
+ * @param msg WakuMessage to publish. The message version is overwritten to `1`
+ * @param publicKey hex encoded public key to be used for encryption
+ * @param optionalSigningKey hex encoded private key to be used to sign the message
+ * @param pubsubTopic pubsub topic on which to publish the message. If not specified, it uses the default pubsub topic. 
+ * @param peerID Peer ID supporting the lightpush protocol.  The peer must be already known.  It must have been added before with `addPeer` or previously dialed with `connect`
+ * @param timeoutMs Timeout value in milliseconds to execute the call. If the function takes longer than this value, the execution will be canceled and an error returned
+ * @returns the message ID
+ */
+export function lightpushPublishEncAsymmetric(msg: WakuMessage, publicKey: String, optionalSigningKey: String = "", pubsubTopic: String = "", peerID: String = "", timeoutMs: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
-    let response = JSON.parse(await ReactNative.lightpushPublishEncodeAsymmetric(messageJSON, topic, peerID, publicKey, optionalSigningKey, ms));
+    let response = JSON.parse(await ReactNative.lightpushPublishEncodeAsymmetric(messageJSON, pubsubTopic, peerID, publicKey, optionalSigningKey, timeoutMs));
     if(response.error){
       reject(response.error);
     } else {
@@ -330,10 +456,20 @@ export function lightpushPublishEncAsymmetric(msg: WakuMessage, publicKey: Strin
   });
 }
 
-export function lightpushPublishEncSymmetric(msg: WakuMessage, symmetricKey: String, optionalSigningKey: String = "", topic: String = "", peerID: String = "", ms: Number = 0): Promise<string> {
+/**
+ * Optionally sign, encrypt using symmetric encryption and publish a message using Waku Lightpush.
+ * @param msg WakuMessage to publish. The message version is overwritten to `1`
+ * @param symmetricKey hex encoded secret key to be used for encryption.
+ * @param optionalSigningKey hex encoded private key to be used to sign the message.
+ * @param pubsubTopic pubsub topic on which to publish the message. If not specified, it uses the default pubsub topic. 
+ * @param peerID Peer ID supporting the lightpush protocol.  The peer must be already known.  It must have been added before with `addPeer` or previously dialed with `connect`
+ * @param timeoutMs Timeout value in milliseconds to execute the call. If the function takes longer than this value, the execution will be canceled and an error returned
+ * @returns the message ID
+ */
+export function lightpushPublishEncSymmetric(msg: WakuMessage, symmetricKey: String, optionalSigningKey: String = "", pubsubTopic: String = "", peerID: String = "", timeoutMs: Number = 0): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg)
-    let response = JSON.parse(await ReactNative.lightpushPublishEncodeAsymmetric(messageJSON, topic,  peerID, symmetricKey, optionalSigningKey, ms));
+    let response = JSON.parse(await ReactNative.lightpushPublishEncodeAsymmetric(messageJSON, pubsubTopic,  peerID, symmetricKey, optionalSigningKey, timeoutMs));
     if(response.error){
       reject(response.error);
     } else {
@@ -356,6 +492,10 @@ export class Peer {
   }
 }
 
+/**
+ * Retrieve the list of peers known by the Waku node.
+ * @returns list of peers
+ */
 export function peers(): Promise<Array<Peer>> {
   return new Promise<Array<Peer>>(async (resolve, reject) => {
     let response = JSON.parse(await ReactNative.peers());
@@ -377,24 +517,49 @@ export class PagingOptions {
   pageSize: Number = 0
   cursor: Index | null = null
   forward: Boolean = false
+
+  constructor(pageSize: Number = 0, forward: Boolean = false, cursor: Index | null = null){
+    this.pageSize = pageSize
+    this.forward = forward
+    this.cursor = cursor
+  }
 }
 
 export class ContentFilter {
   contentTopic: String = ""
+
+  constructor(contentTopic: String = "") {
+    this.contentTopic = contentTopic
+  }
 }
 
 export class StoreQuery {
-  pubsubTopic: String = ""
+  pubsubTopic: String | null = null
   contentFilters: Array<ContentFilter> = Array()
   startTime: Number = 0
   endTime: Number = 0
   pagingOptions: PagingOptions | null = null
+
+  constructor(pubsubTopic: String | null = null, contentFilters: Array<ContentFilter> = Array(), startTime: Number = 0, endTime: Number = 0, pagingOptions: PagingOptions | null = null) {
+    this.pubsubTopic = pubsubTopic
+    this.contentFilters = contentFilters
+    this.startTime = startTime
+    this.endTime = endTime
+    this.pagingOptions = pagingOptions
+  }
 }
 
-export function storeQuery(query: StoreQuery, peerID: String = "", ms: Number = 0): Promise<string> {
+/**
+ * 
+ * @param query 
+ * @param peerID 
+ * @param timeoutMs Timeout value in milliseconds to execute the call. If the function takes longer than this value, the execution will be canceled and an error returned
+ * @returns 
+ */
+export function storeQuery(query: StoreQuery, peerID: String = "", timeoutMs: Number = 0): Promise<any> {
   return new Promise<string>(async (resolve, reject) => {
     let queryJSON = JSON.stringify(query)
-    let response = JSON.parse(await ReactNative.storeQuery(queryJSON, peerID, ms));
+    let response = JSON.parse(await ReactNative.storeQuery(queryJSON, peerID, timeoutMs));
 
     if(response.error){
       reject(response.error);
@@ -407,12 +572,23 @@ export function storeQuery(query: StoreQuery, peerID: String = "", ms: Number = 
 export class FilterSubscription {
   pubsubTopic: String | null = null
   contentFilters: Array<ContentFilter> = Array()
+
+  constructor(pubsubTopic: String | null = null, contentFilters: Array<ContentFilter> = Array()) {
+    this.pubsubTopic = pubsubTopic
+    this.contentFilters = contentFilters
+  }
 }
 
-export function filterSubscribe(filter: FilterSubscription, peerID: String = "", ms: Number = 0): Promise<void> {
+/**
+ * 
+ * @param filter 
+ * @param peerID 
+ * @param timeoutMs Timeout value in milliseconds to execute the call. If the function takes longer than this value, the execution will be canceled and an error returned
+ */
+export function filterSubscribe(filter: FilterSubscription, peerID: String = "", timeoutMs: Number = 0): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     let filterJSON = JSON.stringify(filter)
-    let response = JSON.parse(await ReactNative.filterSubscribe(filterJSON, peerID, ms));
+    let response = JSON.parse(await ReactNative.filterSubscribe(filterJSON, peerID, timeoutMs));
 
     if(response.error){
       reject(response.error);
@@ -422,10 +598,15 @@ export function filterSubscribe(filter: FilterSubscription, peerID: String = "",
   });
 }
 
-export function filterUnsubscribe(filter: FilterSubscription, ms: Number = 0): Promise<void> {
+/**
+ * 
+ * @param filter 
+ * @param timeoutMs Timeout value in milliseconds to execute the call. If the function takes longer than this value, the execution will be canceled and an error returned
+ */
+export function filterUnsubscribe(filter: FilterSubscription, timeoutMs: Number = 0): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     let filterJSON = JSON.stringify(filter)
-    let response = JSON.parse(await ReactNative.filterSubscribe(filterJSON, ms));
+    let response = JSON.parse(await ReactNative.filterUnsubscribe(filterJSON, timeoutMs));
 
     if(response.error){
       reject(response.error);

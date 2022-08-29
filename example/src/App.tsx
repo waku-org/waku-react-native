@@ -1,12 +1,10 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { defaultPubsubTopic, newNode, start, isStarted, stop, peerID, relayEnoughPeers, listenAddresses, connect, peerCnt, peers, relayPublish, relayUnsubscribe, relaySubscribe, WakuMessage, onMessage, storeQuery, StoreQuery } from '@waku/react-native';
+import { defaultPubsubTopic, newNode, start, isStarted, stop, peerID, relayEnoughPeers, listenAddresses, connect, peerCnt, peers, relayPublish, relayUnsubscribe, relaySubscribe, WakuMessage, onMessage, StoreQuery, storeQuery, Config, FilterSubscription, ContentFilter, filterSubscribe} from '@waku/react-native';
 
 export default function App() {
   const [result, setResult] = React.useState<string | undefined>();
-
-  const delay = ms => new Promise(res => setTimeout(res, ms));
 
   React.useEffect(() => {
     (async () => {
@@ -29,7 +27,8 @@ export default function App() {
       console.log("connecting...")
       
       await connect("/dns4/node-01.ac-cn-hongkong-c.wakuv2.test.statusim.net/tcp/30303/p2p/16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm", 5000)
-      
+      await connect("/dns4/node-01.do-ams3.wakuv2.test.statusim.net/tcp/30303/p2p/16Uiu2HAmPLe7Mzm8TsYUubgCAW1aJoeFScxrLj8ppHFivPo97bUZ", 5000)
+
       console.log("connected!") 
 
       console.log("PeerCNT", await peerCnt())
@@ -45,15 +44,28 @@ export default function App() {
 
       console.log("The messageID", messageID)
 
-      /*
+      
+      // TO RETRIEVE HISTORIC MESSAGES:
       console.log("Retrieving messages from store node")
       const query = new StoreQuery();
-      //query.contentFilters.push("/toy-chat/2/luzhou/proto")
+      query.contentFilters.push(new ContentFilter("/toy-chat/2/luzhou/proto"))
       const queryResult = await storeQuery(query, "16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm")
       console.log(queryResult)
+      
+      // USING FILTER INSTEAD OF RELAY:
+      // Instantiate the node passing these parameters:
+      // let config = new Config();
+      // config.relay = false;
+      // config.filter = true;
+      // newNode(config})
+      /*
+      const filterSubs = new FilterSubscription();
+      filterSubs.contentFilters.push(new ContentFilter("/toy-chat/2/luzhou/proto"))
+      await filterSubscribe(filterSubs, "16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm")
       */
-     
-      // await delay(5000) // Waiting 5s before unsubscribing
+
+
+   
 
       // console.log("Unsubscribing and stopping node...")
 
