@@ -82,7 +82,7 @@ export default function App() {
       let msg = new WakuMessage();
       msg.contentTopic = 'ABC';
       msg.payload = new Uint8Array([1, 2, 3, 4, 5]);
-      msg.timestamp = Date.now();
+      msg.timestamp = new Date();
       msg.version = 0;
 
       let messageID = await relayPublish(msg);
@@ -92,7 +92,7 @@ export default function App() {
       // TO RETRIEVE HISTORIC MESSAGES:
       console.log('Retrieving messages from store node');
       const query = new StoreQuery();
-      query.contentFilters.push(new ContentFilter('/toy-chat/2/luzhou/proto'));
+      query.contentFilters.push(new ContentFilter('test-rramos'));
       const queryResult = await storeQuery(
         query,
         '16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm'
