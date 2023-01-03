@@ -1,5 +1,6 @@
 import { NativeModules, Platform, NativeEventEmitter } from 'react-native';
 import { decode, encode } from 'base-64';
+import bigInt from 'big-integer';
 
 const LINKING_ERROR =
   `The package '@waku/react-native' doesn't seem to be linked. Make sure: \n\n` +
@@ -22,7 +23,7 @@ export function multiply(a: number, b: number): Promise<number> {
   return ReactNative.multiply(a, b);
 }
 
-const OneMillion = BigInt(1_000_000);
+const OneMillion = bigInt(1_000_000);
 
 export class WakuMessage {
   payload: Uint8Array = new Uint8Array();
@@ -36,7 +37,7 @@ export class WakuMessage {
       contentTopic: this.contentTopic,
       version: this.version,
       timestamp: this.timestamp
-        ? (BigInt(this.timestamp.valueOf()) * OneMillion).toString(10)
+        ? bigInt(this.timestamp.valueOf()).multiply(OneMillion).toString(10)
         : 0,
       payload: b64encoded,
     };
@@ -715,10 +716,10 @@ export function storeQuery(
       pubsubTopic: query.pubsubTopic,
       contentFilters: query.contentFilters,
       startTime: query.startTime
-        ? (BigInt(query.startTime.valueOf()) * OneMillion).toString(10)
+        ? bigInt(query.startTime.valueOf()).multiply(OneMillion).toString(10)
         : 0,
       endTime: query.endTime
-        ? (BigInt(query.endTime.valueOf()) * OneMillion).toString(10)
+        ? bigInt(query.endTime.valueOf()).multiply(OneMillion).toString(10)
         : 0,
       pagingOptions: query.pagingOptions,
     });
