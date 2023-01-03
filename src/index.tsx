@@ -20,19 +20,20 @@ export function multiply(a: number, b: number): Promise<number> {
   return ReactNative.multiply(a, b);
 }
 
+const OneMillion = BigInt(1_000_000);
 
 export class WakuMessage {
       payload: Uint8Array = new Uint8Array();
       contentTopic: String | null = "";
       version: Number | null = 0;
-      timestamp: Number | null = null;
+      timestamp?: Date = undefined;
     
       toJSON(){
         const b64encoded = encode(String.fromCharCode(...this.payload));
         return {
           contentTopic: this.contentTopic,
           version: this.version,
-          timestamp: this.timestamp,
+          timestamp: this.timestamp ? (BigInt(this.timestamp.valueOf()) * OneMillion).toString(10) : 0,
           payload: b64encoded
         }
       }
@@ -536,11 +537,11 @@ export class ContentFilter {
 export class StoreQuery {
   pubsubTopic: String | null = null
   contentFilters: Array<ContentFilter> = Array()
-  startTime: Number = 0
-  endTime: Number = 0
+  startTime?: Date = undefined
+  endTime?:  Date = undefined
   pagingOptions: PagingOptions | null = null
 
-  constructor(pubsubTopic: String | null = null, contentFilters: Array<ContentFilter> = Array(), startTime: Number = 0, endTime: Number = 0, pagingOptions: PagingOptions | null = null) {
+  constructor(pubsubTopic: String | null = null, contentFilters: Array<ContentFilter> = Array(), startTime: Date | undefined = undefined, endTime: Date | undefined = undefined, pagingOptions: PagingOptions | null = null) {
     this.pubsubTopic = pubsubTopic
     this.contentFilters = contentFilters
     this.startTime = startTime
@@ -558,7 +559,13 @@ export class StoreQuery {
  */
 export function storeQuery(query: StoreQuery, peerID: String = "", timeoutMs: Number = 0): Promise<any> {
   return new Promise<string>(async (resolve, reject) => {
-    let queryJSON = JSON.stringify(query)
+    let queryJSON = JSON.stringify({
+      pubsubTopic: query.pubsubTopic,
+      contentFilters: query.contentFilters,
+      startTime:  query.startTime ? (BigInt(query.startTime.valueOf()) * OneMillion).toString(10) : 0,
+      endTime:  query.endTime ? (BigInt(query.endTime.valueOf()) * OneMillion).toString(10) : 0,
+      pagingOptions: query.pagingOptions
+    })
     let response = JSON.parse(await ReactNative.storeQuery(queryJSON, peerID, timeoutMs));
 
     if(response.error){
