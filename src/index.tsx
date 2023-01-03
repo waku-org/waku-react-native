@@ -166,7 +166,10 @@ export function relayPublish(
   timeoutMs: Number = 0
 ): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
-    let messageJSON = JSON.stringify(msg);
+    let messageJSON = JSON.stringify(msg).replace(
+      /"timestamp":"([0-9]+)"/,
+      `"timestamp":$1`
+    );
     let response = JSON.parse(
       await ReactNative.relayPublish(messageJSON, pubsubTopic, timeoutMs)
     );
@@ -516,7 +519,10 @@ export function lightpushPublish(
   timeoutMs: Number = 0
 ): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
-    let messageJSON = JSON.stringify(msg);
+    let messageJSON = JSON.stringify(msg).replace(
+      /"timestamp":"([0-9]+)"/,
+      `"timestamp":$1`
+    );
     let response = JSON.parse(
       await ReactNative.lightpushPublish(
         messageJSON,
@@ -722,7 +728,9 @@ export function storeQuery(
         ? bigInt(query.endTime.valueOf()).multiply(OneMillion).toString(10)
         : 0,
       pagingOptions: query.pagingOptions,
-    });
+    })
+      .replace(/"startTime":"([0-9]+)"/, `"startTime":$1`)
+      .replace(/"endTime":"([0-9]+)"/, `"endTime":$1`);
     let response = JSON.parse(
       await ReactNative.storeQuery(queryJSON, peerID, timeoutMs)
     );
