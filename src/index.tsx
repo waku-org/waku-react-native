@@ -738,6 +738,11 @@ export function storeQuery(
     if (response.error) {
       reject(response.error);
     } else {
+      if(response.result.messages){
+        for(let i = 0; i < response.result.messages.length; i++){
+          response.result.messages[i].payload = new Uint8Array(decode(response.result.messages[i].payload ?? []).split('').map(c => c.charCodeAt(0)));
+        }
+      }
       resolve(response.result);
     }
   });
