@@ -9,12 +9,10 @@ npm install @waku/react-native
 ## Usage
 
 ```js
-import { multiply } from "@waku/react-native";
-
-// ...
-
-const result = await multiply(3, 7);
+import * as waku from "@waku/react-native";
 ```
+
+See also [Fixing `route ip+net: netlinkrib: permission denied` in android](android-netlink.md)
 
 ## Contributing
 

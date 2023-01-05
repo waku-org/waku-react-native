@@ -19,10 +19,6 @@ const ReactNative = NativeModules.ReactNative
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return ReactNative.multiply(a, b);
-}
-
 const OneMillion = bigInt(1_000_000);
 
 export class WakuMessage {
