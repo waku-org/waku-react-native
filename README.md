@@ -6,6 +6,12 @@ Waku React Native
 npm install @waku/react-native
 ```
 
+Edit `settings.gradle` from your app and add:
+```
+include ':gowaku'
+project(':gowaku').projectDir = new File(rootProject.projectDir, './../node_modules/@waku/react-native/android/gowaku')
+```
+
 ## Usage
 
 ```js

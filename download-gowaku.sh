@@ -41,8 +41,8 @@ if [ "$DOWNLOAD_ANDROID" = true ]; then
         exit 1
     fi
 
-    rm -f ../android/libs/gowaku*
-    tar xvfz ${ANDROID_TAR} -C ../android/libs
+    rm -f ../android/gowaku/gowaku*
+    tar xvfz ${ANDROID_TAR} -C ../android/gowaku
 fi
 
 if [ "$DOWNLOAD_IOS" = true ]; then

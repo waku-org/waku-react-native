@@ -19,7 +19,7 @@ const ReactNative = NativeModules.ReactNative
       }
     );
 
-const OneMillion = bigInt(1_000_000);
+const OneMillion = bigInt(1000000);
 
 export class WakuMessage {
   payload: Uint8Array = new Uint8Array();
@@ -51,7 +51,10 @@ export function onMessage(cb: (arg0: any) => void) {
     let signal = JSON.parse(event.signal);
     let msg = signal.event.wakuMessage;
     signal.event.wakuMessage = new WakuMessage();
-    signal.event.wakuMessage.timestamp = msg.timestamp;
+    signal.event.wakuMessage.timestamp =
+      msg.timestamp != 0
+        ? new Date(bigInt(msg.timestamp).divide(OneMillion).toJSNumber())
+        : undefined;
     signal.event.wakuMessage.version = msg.version || 0;
     signal.event.wakuMessage.contentTopic = msg.contentTopic;
     signal.event.wakuMessage.payload = new Uint8Array(
@@ -734,9 +737,18 @@ export function storeQuery(
     if (response.error) {
       reject(response.error);
     } else {
-      if(response.result.messages){
-        for(let i = 0; i < response.result.messages.length; i++){
-          response.result.messages[i].payload = new Uint8Array(decode(response.result.messages[i].payload ?? []).split('').map(c => c.charCodeAt(0)));
+      if (response.result.messages) {
+        for (let i = 0; i < response.result.messages.length; i++) {
+          const t = response.result.messages[i].timestamp;
+          response.result.messages[i].timestamp =
+            t != 0
+              ? new Date(bigInt(t).divide(OneMillion).toJSNumber())
+              : undefined;
+          response.result.messages[i].payload = new Uint8Array(
+            decode(response.result.messages[i].payload ?? [])
+              .split('')
+              .map((c) => c.charCodeAt(0))
+          );
         }
       }
       resolve(response.result);

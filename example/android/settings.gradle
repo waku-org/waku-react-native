@@ -15,3 +15,6 @@ if (settings.hasProperty("newArchEnabled") && settings.newArchEnabled == "true")
   include(":ReactAndroid:hermes-engine")
   project(":ReactAndroid:hermes-engine").projectDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), "../ReactAndroid/hermes-engine");
 }
+
+include ':gowaku'
+project(':gowaku').projectDir = new File(rootProject.projectDir, './../node_modules/@waku/react-native/android/gowaku')

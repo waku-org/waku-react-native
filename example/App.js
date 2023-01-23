@@ -39,7 +39,7 @@ export default function App() {
       }
       console.log('The node ID:', await peerID());
 
-      await relaySubscribe();
+     await relaySubscribe();
 
       onMessage((event) => {
         setResult(
@@ -92,7 +92,7 @@ export default function App() {
       // TO RETRIEVE HISTORIC MESSAGES:
       console.log('Retrieving messages from store node');
       const query = new StoreQuery();
-      query.contentFilters.push(new ContentFilter('test-rramos'));
+      query.contentFilters.push(new ContentFilter('ABC'));
       const queryResult = await storeQuery(
         query,
         '16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm'
