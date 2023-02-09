@@ -434,7 +434,7 @@ export function decodeAsymmetric(
   return new Promise<DecodedPayload>(async (resolve, reject) => {
     let messageJSON = JSON.stringify(msg);
     let response = JSON.parse(
-      await ReactNative.decodeSymmetric(messageJSON, privateKey)
+      await ReactNative.decodeAsymmetric(messageJSON, privateKey)
     );
     if (response.error) {
       reject(response.error);
