@@ -21,6 +21,8 @@
     "android",
     "ios",
     "cpp",
+    "download-gowaku.sh",
+    "go-waku.VERSION",
     "waku-react-native.podspec",
     "!lib/typescript/example",
     "!android/build",
