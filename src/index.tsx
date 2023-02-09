@@ -377,6 +377,27 @@ export function peerCnt(): Promise<Number> {
   });
 }
 
+export class EncryptedPayload extends WakuMessage {
+  constructor(msg: WakuMessage) {
+    super();
+    this.contentTopic = msg.contentTopic;
+    this.version = msg.version;
+    this.timestamp = msg.timestamp;
+    this.payload = msg.payload;
+  }
+
+  toJSON() {
+    return {
+      contentTopic: this.contentTopic,
+      version: this.version,
+      timestamp: this.timestamp
+        ? bigInt(this.timestamp.valueOf()).multiply(OneMillion).toJSNumber()
+        : 0,
+      payload: Buffer.from(Array.from(this.payload)).toString('base64'),
+    };
+  }
+}
+
 export class DecodedPayload {
   payload: Uint8Array = new Uint8Array();
   padding: Uint8Array = new Uint8Array();
@@ -404,7 +425,8 @@ export function decodeSymmetric(
   symmetricKey: String
 ): Promise<DecodedPayload> {
   return new Promise<DecodedPayload>(async (resolve, reject) => {
-    let messageJSON = JSON.stringify(msg);
+    let message = new EncryptedPayload(msg);
+    let messageJSON = JSON.stringify(message);
     let response = JSON.parse(
       await ReactNative.decodeSymmetric(messageJSON, symmetricKey)
     );
@@ -432,7 +454,8 @@ export function decodeAsymmetric(
   privateKey: String
 ): Promise<DecodedPayload> {
   return new Promise<DecodedPayload>(async (resolve, reject) => {
-    let messageJSON = JSON.stringify(msg);
+    let message = new EncryptedPayload(msg);
+    let messageJSON = JSON.stringify(message);
     let response = JSON.parse(
       await ReactNative.decodeAsymmetric(messageJSON, privateKey)
     );
@@ -534,7 +557,8 @@ export function lightpushPublishEncAsymmetric(
   timeoutMs: Number = 0
 ): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
-    let messageJSON = JSON.stringify(msg);
+    let message = new EncryptedPayload(msg);
+    let messageJSON = JSON.stringify(message);
     let response = JSON.parse(
       await ReactNative.lightpushPublishEncodeAsymmetric(
         messageJSON,
@@ -572,7 +596,8 @@ export function lightpushPublishEncSymmetric(
   timeoutMs: Number = 0
 ): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
-    let messageJSON = JSON.stringify(msg);
+    let message = new EncryptedPayload(msg);
+    let messageJSON = JSON.stringify(message);
     let response = JSON.parse(
       await ReactNative.lightpushPublishEncodeAsymmetric(
         messageJSON,
