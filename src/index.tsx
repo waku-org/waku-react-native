@@ -1,6 +1,6 @@
 import { NativeModules, Platform, NativeEventEmitter } from 'react-native';
-import { decode, encode } from 'base-64';
 import bigInt from 'big-integer';
+import { Buffer } from 'buffer';
 
 const LINKING_ERROR =
   `The package '@waku/react-native' doesn't seem to be linked. Make sure: \n\n` +
@@ -28,14 +28,13 @@ export class WakuMessage {
   timestamp?: Date = undefined;
 
   toJSON() {
-    const b64encoded = encode(String.fromCharCode(...this.payload));
     return {
       contentTopic: this.contentTopic,
       version: this.version,
       timestamp: this.timestamp
         ? bigInt(this.timestamp.valueOf()).multiply(OneMillion).toString(10)
         : 0,
-      payload: b64encoded,
+      payload: Buffer.from(this.payload).toString('base64'),
     };
   }
 }
@@ -57,11 +56,7 @@ export function onMessage(cb: (arg0: any) => void) {
         : undefined;
     signal.event.wakuMessage.version = msg.version || 0;
     signal.event.wakuMessage.contentTopic = msg.contentTopic;
-    signal.event.wakuMessage.payload = new Uint8Array(
-      decode(msg.payload ?? [])
-        .split('')
-        .map((c: any) => c.charCodeAt(0))
-    );
+    signal.event.wakuMessage.payload = Buffer.from(msg.payload, 'base64');
     cb(signal.event);
   });
 }
@@ -389,11 +384,9 @@ export class DecodedPayload {
   signature: String | null = '';
 
   toJSON() {
-    const b64payload = encode(String.fromCharCode(...this.payload));
-    const b64padding = encode(String.fromCharCode(...this.padding));
     return {
-      payload: b64payload,
-      padding: b64padding,
+      payload: Buffer.from(this.payload).toString('base64'),
+      padding: Buffer.from(this.padding).toString('base64'),
       pubkey: this.pubkey,
       signature: this.signature,
     };
@@ -419,16 +412,8 @@ export function decodeSymmetric(
       reject(response.error);
     } else {
       let decodedPayload = new DecodedPayload();
-      decodedPayload.payload = new Uint8Array(
-        atob(response.result.payload)
-          .split('')
-          .map((c) => c.charCodeAt(0))
-      );
-      decodedPayload.padding = new Uint8Array(
-        atob(response.result.padding)
-          .split('')
-          .map((c) => c.charCodeAt(0))
-      );
+      decodedPayload.payload = Buffer.from(response.result.data, 'base64');
+      decodedPayload.padding = Buffer.from(response.result.padding, 'base64');
       decodedPayload.pubkey = response.result.pubkey;
       decodedPayload.signature = response.result.signature;
       resolve(decodedPayload);
@@ -455,16 +440,8 @@ export function decodeAsymmetric(
       reject(response.error);
     } else {
       let decodedPayload = new DecodedPayload();
-      decodedPayload.payload = new Uint8Array(
-        atob(response.result.payload)
-          .split('')
-          .map((c) => c.charCodeAt(0))
-      );
-      decodedPayload.padding = new Uint8Array(
-        atob(response.result.padding)
-          .split('')
-          .map((c) => c.charCodeAt(0))
-      );
+      decodedPayload.payload = Buffer.from(response.result.data, 'base64');
+      decodedPayload.padding = Buffer.from(response.result.padding, 'base64');
       decodedPayload.pubkey = response.result.pubkey;
       decodedPayload.signature = response.result.signature;
       resolve(decodedPayload);
@@ -745,9 +722,7 @@ export function storeQuery(
               ? new Date(bigInt(t).divide(OneMillion).toJSNumber())
               : undefined;
           response.result.messages[i].payload = new Uint8Array(
-            decode(response.result.messages[i].payload ?? [])
-              .split('')
-              .map((c) => c.charCodeAt(0))
+            Buffer.from(response.result.messages[i].payload ?? [], 'base64')
           );
         }
       }
