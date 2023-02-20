@@ -177,4 +177,9 @@ class ReactNative: RCTEventEmitter {
         resolve(GowakuFilterUnsubscribe(filterJSON, ms))
     }
 
+    @objc(dnsDiscovery:withNameserver:withMs:withResolver:withRejecter:)
+    func dnsDiscovery(url: String, nameserver: String, ms: Int, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
+        resolve(GowakuDnsDiscovery(url, nameserver, ms))
+    }
+
 }

@@ -146,5 +146,11 @@ RCT_EXTERN_METHOD(filterUnsubscribe:(NSString *)filterJSON
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(dnsDiscovery:(NSString *)url
+                 withNameserver:(NSString *)nameserver
+                 withMs:(nonnull NSNumber *)ms
+                 withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
+
 
 @end

@@ -30,11 +30,11 @@ mkdir -p tmp
 cd tmp
 
 rm -f ${SHA_FILE}
-wget "https://github.com/status-im/go-waku/releases/download/v${VERSION}/${SHA_FILE}"
+wget "https://github.com/waku-org/go-waku/releases/download/v${VERSION}/${SHA_FILE}"
 
 if [ "$DOWNLOAD_ANDROID" = true ]; then
     rm -f ${ANDROID_TAR}
-    wget "https://github.com/status-im/go-waku/releases/download/v${VERSION}/${ANDROID_TAR}"
+    curl -L "https://github.com/waku-org/go-waku/releases/download/v${VERSION}/${ANDROID_TAR}" --output $ANDROID_TAR
     sha256sum --status --ignore-missing -c ${SHA_FILE}
     if ! sha256sum --status --ignore-missing -c ${SHA_FILE}; then
         echo "checksum failed - verify download"
@@ -47,7 +47,7 @@ fi
 
 if [ "$DOWNLOAD_IOS" = true ]; then
     rm -f ${IOS_TAR}
-    wget "https://github.com/status-im/go-waku/releases/download/v${VERSION}/${IOS_TAR}"
+    curl -L "https://github.com/waku-org/go-waku/releases/download/v${VERSION}/${IOS_TAR}" --output $IOS_TAR
 
     if ! sha256sum --status --ignore-missing -c ${SHA_FILE}; then
         echo "checksum failed - verify download"
