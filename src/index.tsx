@@ -56,20 +56,25 @@ export function onMessage(cb: (arg0: any) => void) {
         : undefined;
     signal.event.wakuMessage.version = msg.version || 0;
     signal.event.wakuMessage.contentTopic = msg.contentTopic;
-    signal.event.wakuMessage.payload = Buffer.from(msg.payload, 'base64');
+    signal.event.wakuMessage.payload = Buffer.from(msg.payload || [], 'base64');
     cb(signal.event);
   });
 }
 
 export class Config {
-  host: String | null = null;
-  port: Number | null = null;
-  advertiseAddr: String | null = null;
-  nodeKey: String | null = null;
-  keepAliveInterval: Number | null = null;
-  relay: Boolean | null = null;
-  filter: Boolean | null = null;
+  host: String | null = null; // IP address. Default 0.0.0.0
+  port: Number | null = null; // TCP port to listen. Default 60000. Use 0 for random
+  advertiseAddr: String | null = null; // Advertise custom multiaddress
+  nodeKey: String | null = null; // secp256k1 private key. Default random
+  keepAliveInterval: Number | null = null; // interval in seconds to ping all peers
+  relay: Boolean | null = null; // enable waku relay
+  relayTopics: Array<String> = []; // array of pubsub topics that WakuRelay will automatically subscribe to when the node starts
   minPeersToPublish: Number | null = null;
+  filter: Boolean | null = null; // enable waku filter
+  discv5: Boolean | null = null; // enable discv5
+  discV5BootstrapNodes: Array<String> = []; // array of bootstrap nodes ENR
+  discV5UDPPort: Number | null = null; // UDP port for DiscoveryV5
+  logLevel: String | null = null; // Set the log level. Default `INFO`. Allowed values "DEBUG", "INFO", "WARN", "ERROR", "DPANIC", "PANIC", "FATAL"
 }
 
 /**
@@ -648,6 +653,45 @@ export function peers(): Promise<Array<Peer>> {
       resolve(
         response.result.map(
           (x: any) => new Peer(x.addrs, x.connected, x.peerID, x.protocols)
+        )
+      );
+    }
+  });
+}
+
+export class DiscoveredNode {
+  peerID: String = '';
+  addrs: Array<String> = Array();
+  enr: String = '';
+
+  constructor(
+    peerID: String,
+    addrs: Array<String>,
+    enr: String
+  ) {
+    this.peerID = peerID;
+    this.addrs = addrs;
+    this.enr = enr;
+  }
+}
+
+/**
+ * Use DNS Discovery to retrieve a list of nodes from an enrtree:// URL
+ * @return List of Nodes
+ */
+export function dnsDiscovery(
+  url: String,
+  nameserver: String,
+  timeoutMs: Number = 0
+): Promise<Array<DiscoveredNode>> {
+  return new Promise<Array<DiscoveredNode>>(async (resolve, reject) => {
+    let response = JSON.parse(await ReactNative.dnsDiscovery(url, nameserver, timeoutMs));
+    if (response.error) {
+      reject(response.error);
+    } else {
+      resolve(
+        response.result.map(
+          (x: any) => new DiscoveredNode(x.peerID, x.multiaddrs, x.enr)
         )
       );
     }

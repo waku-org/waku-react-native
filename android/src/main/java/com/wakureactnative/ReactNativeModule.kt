@@ -183,4 +183,8 @@ class ReactNativeModule(reactContext: ReactApplicationContext) : ReactContextBas
         promise.resolve(Gowaku.filterUnsubscribe(filterJSON, ms.toLong()))
     }
 
+    @ReactMethod
+    fun dnsDiscovery(url: String, nameserver: String = "", ms: Double, promise: Promise) {
+        promise.resolve(Gowaku.dnsDiscovery(url, nameserver, ms.toLong()))
+    }
 }

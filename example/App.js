@@ -24,7 +24,10 @@ import {
   FilterSubscription,
   ContentFilter,
   filterSubscribe,
+  dnsDiscovery,
 } from '@waku/react-native';
+
+const myContentTopic = '/example/1/react-native-app/proto';
 
 export default function App() {
   const [result, setResult] = React.useState();
@@ -39,14 +42,16 @@ export default function App() {
       }
       console.log('The node ID:', await peerID());
 
-     await relaySubscribe();
+      await relaySubscribe();
 
       onMessage((event) => {
+        if (event.wakuMessage.contentTopic !== myContentTopic) return;
+
         setResult(
           'Message received: ' +
             event.wakuMessage.timestamp +
             ' - payload:[' +
-            event.wakuMessage.payload +
+            JSON.stringify(event.wakuMessage.payload) +
             ']'
         );
         console.log('Message received: ', event);
@@ -80,7 +85,7 @@ export default function App() {
       console.log('Peers', await peers());
 
       let msg = new WakuMessage();
-      msg.contentTopic = 'ABC';
+      msg.contentTopic = myContentTopic;
       msg.payload = new Uint8Array([1, 2, 3, 4, 5]);
       msg.timestamp = new Date();
       msg.version = 0;
@@ -92,12 +97,20 @@ export default function App() {
       // TO RETRIEVE HISTORIC MESSAGES:
       console.log('Retrieving messages from store node');
       const query = new StoreQuery();
-      query.contentFilters.push(new ContentFilter('ABC'));
+      query.contentFilters.push(new ContentFilter(myContentTopic));
       const queryResult = await storeQuery(
         query,
         '16Uiu2HAkvWiyFsgRhuJEb9JfjYxEkoHLgnUQmr1N5mKWnYjxYRVm'
       );
       console.log(queryResult);
+
+      // DNS Discovery
+      console.log('Retrieving Nodes using DNS Discovery');
+      const dnsDiscoveryResult = await dnsDiscovery(
+        'enrtree://AOGECG2SPND25EEFMAJ5WF3KSGJNSGV356DSTL2YVLLZWIV6SAYBM@test.waku.nodes.status.im',
+        '1.1.1.1'
+      );
+      console.log(dnsDiscoveryResult);
 
       // USING FILTER INSTEAD OF RELAY:
       // Instantiate the node passing these parameters:
